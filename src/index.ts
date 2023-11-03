@@ -14,7 +14,6 @@ type PackageType = 'maven' | 'npm' | 'rubygems' | 'docker' | 'nuget' | 'containe
     const packageTypeStr: string = core.getInput('package-type');
     const packageType: PackageType = packageTypeStr as PackageType;
 
-
     let owner: string = core.getInput('owner');
     if (!owner) {
       const repoInfo: string[] = process.env.GITHUB_REPOSITORY!.split('/');
