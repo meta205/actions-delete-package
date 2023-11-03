@@ -33557,22 +33557,25 @@ const rest_1 = __nccwpck_require__(1458);
             const repoInfo = process.env.GITHUB_REPOSITORY.split('/');
             owner = repoInfo[0];
         }
-        yield octokit.packages.getAllPackageVersionsForPackageOwnedByOrg({
-            package_type: packageType,
-            package_name: packageName,
-            org: owner
-        }).then(({ data }) => __awaiter(void 0, void 0, void 0, function* () {
-            const targetPackages = data.filter(p => p.name === packageVersion);
-            for (const targetPackage of targetPackages) {
-                console.log(`Deleting package... (version: "${targetPackage.name}", url: "${targetPackage.url})"`);
-                yield octokit.packages.deletePackageVersionForOrg({
-                    package_type: packageType,
-                    package_name: packageName,
-                    org: owner,
-                    package_version_id: targetPackage.id
-                });
-            }
-        }));
+        const pkgNames = packageName.split(',');
+        for (const pkgName of pkgNames) {
+            yield octokit.packages.getAllPackageVersionsForPackageOwnedByOrg({
+                package_type: packageType,
+                package_name: pkgName,
+                org: owner
+            }).then(({ data }) => __awaiter(void 0, void 0, void 0, function* () {
+                const targetPackages = data.filter(p => p.name === packageVersion);
+                for (const targetPackage of targetPackages) {
+                    console.log(`Deleting package... (version: "${targetPackage.name}", url: "${targetPackage.url})"`);
+                    yield octokit.packages.deletePackageVersionForOrg({
+                        package_type: packageType,
+                        package_name: packageName,
+                        org: owner,
+                        package_version_id: targetPackage.id
+                    });
+                }
+            }));
+        }
     }
     catch (err) {
         core.setFailed(err.message);

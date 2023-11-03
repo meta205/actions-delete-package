@@ -21,24 +21,27 @@ type PackageType = 'maven' | 'npm' | 'rubygems' | 'docker' | 'nuget' | 'containe
       owner = repoInfo[0];
     }
 
-    await octokit.packages.getAllPackageVersionsForPackageOwnedByOrg({
-      package_type: packageType,
-      package_name: packageName,
-      org: owner
-    }).then(async ({ data }) => {
-      const targetPackages = data.filter(p => p.name === packageVersion);
+    const pkgNames: string[] = packageName.split(',');
+    for (const pkgName of pkgNames) {
+      await octokit.packages.getAllPackageVersionsForPackageOwnedByOrg({
+        package_type: packageType,
+        package_name: pkgName,
+        org: owner
+      }).then(async ({ data }) => {
+        const targetPackages = data.filter(p => p.name === packageVersion);
 
-      for (const targetPackage of targetPackages) {
-        console.log(`Deleting package... (version: "${targetPackage.name}", url: "${targetPackage.url})"`);
+        for (const targetPackage of targetPackages) {
+          console.log(`Deleting package... (version: "${targetPackage.name}", url: "${targetPackage.url})"`);
 
-        await octokit.packages.deletePackageVersionForOrg({
-          package_type: packageType,
-          package_name: packageName,
-          org: owner,
-          package_version_id: targetPackage.id
-        });
-      }
-    })
+          await octokit.packages.deletePackageVersionForOrg({
+            package_type: packageType,
+            package_name: packageName,
+            org: owner,
+            package_version_id: targetPackage.id
+          });
+        }
+      })
+    }
   } catch (err: any) {
     core.setFailed(err.message);
   }
